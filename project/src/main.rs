@@ -1,32 +1,18 @@
 #![allow(unused_imports)]
 
 pub mod linked_list;
-use linked_list::List;
-use std::ptr;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Error;
 
-struct A {
-}
-
-impl Drop for A {
-    fn drop(&mut self) {
-        println!("dropping A");
-    }
-}
-
-impl Display for A {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "A")
-    }
-}
+pub mod raw_linked_list;
+use raw_linked_list::List;
 
 fn main() {
-    let mut l = List::<A>::new();
-    l.push_back(A{});
-    l.push_back(A{});
-    let it = l.iter();
-    drop(l);
-    println!("a");
+    let mut l = List::<i32>::new();
+    l.push_back(1);
+    l.push_back(2);
+    let mut it = l.iter();
+    println!("{}", it.next().unwrap());
+
 }
