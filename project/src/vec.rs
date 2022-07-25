@@ -275,4 +275,17 @@ mod test {
             j += 1;
         }
     }
+
+    #[test]
+    fn clone() {
+        let mut v1 = Vec::<i32>::new();
+        v1.push_back(2);
+        v1.push_back(3);
+
+        let v2 = v1.clone();
+        assert_eq!(v1.size(), v2.size());
+        for i in 0..v1.size() {
+            assert_eq!(v1[i], v2[i]);
+        }
+    }
 }

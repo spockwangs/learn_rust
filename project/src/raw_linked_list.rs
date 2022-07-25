@@ -4,6 +4,7 @@ use std::alloc::alloc;
 extern crate alloc;
 use alloc::alloc::dealloc;
 use core::marker::PhantomData;
+use std::mem;
 
 pub struct List<T> {
     head: RawLink<T>,
@@ -24,15 +25,14 @@ impl<T> Copy for RawLink<T> { }
     
 impl<T> RawLink<T> {
     fn new(a: T) -> Self {
+        let layout = Layout::new::<Node<T>>();
+        let ptr = unsafe { alloc(layout) } as *mut Node<T>;
         unsafe {
-            let layout = Layout::new::<Node<T>>();
-            let ptr = alloc(layout) as *mut Node<T>;
-            let r = &mut *ptr;
-            r.element = a;
-            r.next = RawLink::none();
-            RawLink {
-                ptr: ptr
-            }
+            ptr::write(&mut (*ptr).element as *mut T, a);
+            ptr::write(&mut (*ptr).next as *mut RawLink<T>, RawLink::none());
+        }
+        RawLink {
+            ptr: ptr
         }
     }
 
@@ -113,14 +113,14 @@ impl<T> List<T> {
 }
 
 impl<T> Drop for List<T> {
-    fn drop(&mut self) {
-        while let Some(_) = self.pop_front() { }
-    }
-}
+     fn drop(&mut self) {
+         while let Some(_) = self.pop_front() { }
+     }
+ }
 
 pub struct ListIterator<'a, T: 'a> {
     cur: RawLink<T>,
-    _marker: PhantomData<&'a T>,
+    _marker: PhantomData<fn(&'a usize)>,
 }
 
 impl<'a, T> Iterator for ListIterator<'a, T> {
