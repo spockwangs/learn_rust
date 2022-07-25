@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
-use std::mem;
-use std::ptr;
 use std::alloc::Layout;
 use std::alloc::alloc;
 use std::alloc::dealloc;
+use std::mem::ManuallyDrop;
 use std::ops::Index;
 use std::ops::IndexMut;
+use std::ptr;
 
 pub struct Vec<T> {
     data: *mut T,
@@ -146,6 +146,57 @@ impl<T> Drop for Vec<T> {
     }
 }
 
+impl<T> IntoIterator for Vec<T> {
+    type Item = T;
+    type IntoIter = IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut me = ManuallyDrop::new(self);
+        IntoIter {
+            start: me.data,
+            capacity: me.capacity,
+            cur: me.data,
+            end: unsafe { me.data.add(me.len) },
+        }
+    }
+}
+
+pub struct IntoIter<T> {
+    start: *const T,
+    capacity: usize,
+    cur: *const T,
+    end: *const T,
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.cur == self.end {
+            None
+        } else {
+            let old = self.cur;
+            self.cur = unsafe { self.cur.add(1) };
+            Some(unsafe {
+                ptr::read(old)
+            })
+        }
+    }
+}
+
+impl<T> Drop for IntoIter<T> {
+    fn drop(&mut self) {
+        unsafe {
+            let len = self.end.offset_from(self.cur) as usize;
+            if len > 0 {
+                ptr::drop_in_place(ptr::slice_from_raw_parts_mut(self.cur as *mut T, len));
+            }
+            let layout = Layout::array::<T>(self.capacity).unwrap_unchecked();
+            dealloc(self.start as *mut u8, layout);
+        }
+    }
+}
+
 pub struct Iter<'a, T> {
     v: &'a Vec<T>,
     cur: usize,
@@ -201,5 +252,27 @@ mod test {
     fn test2() {
         let mut v = Vec::<i32>::new();
         v[0] = 1;
+    }
+
+    #[test]
+    fn test3() {
+        let mut v = Vec::<i32>::new();
+        v.push_back(1);
+        let mut it = v.iter();
+        println!("{}", it.next().unwrap());
+    }
+
+    #[test]
+    fn test4() {
+        let mut v = Vec::<i32>::new();
+        for i in 0..100 {
+            v.push_back(i);
+        }
+        assert_eq!(v.size(), 100);
+        let mut j = 0;
+        for i in v {
+            assert_eq!(i, j);
+            j += 1;
+        }
     }
 }
