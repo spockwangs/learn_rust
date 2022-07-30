@@ -7,6 +7,7 @@ use std::mem::ManuallyDrop;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::ptr;
+use std::fmt;
 
 pub struct Vec<T> {
     data: *mut T,
@@ -146,6 +147,19 @@ impl<T> Drop for Vec<T> {
     }
 }
 
+#[macro_export]
+macro_rules! vec {
+    ( $($x:expr),* ) => {
+        {
+            let mut tmp_vec = vec::Vec::new();
+            $(
+                tmp_vec.push_back($x);
+            )*
+                tmp_vec
+        }
+    };
+}
+
 impl<T> IntoIterator for Vec<T> {
     type Item = T;
     type IntoIter = IntoIter<Self::Item>;
@@ -158,6 +172,15 @@ impl<T> IntoIterator for Vec<T> {
             cur: me.data,
             end: unsafe { me.data.add(me.len) },
         }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Vec<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -194,6 +217,24 @@ impl<T> Drop for IntoIter<T> {
             let layout = Layout::array::<T>(self.capacity).unwrap_unchecked();
             dealloc(self.start as *mut u8, layout);
         }
+    }
+}
+
+impl<T> fmt::Display for Vec<T>
+where T: fmt::Display
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[")?;
+        let mut first = true;
+        for e in self {
+            if !first {
+                write!(f, ", ")?;
+            } else {
+                first = false;
+            }
+            write!(f, "{}", e)?;
+        }
+        write!(f, "]")
     }
 }
 
