@@ -7,12 +7,17 @@ use std::mem::ManuallyDrop;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::ptr;
+<<<<<<< HEAD
 use std::fmt;
+=======
+use std::marker::PhantomData;
+>>>>>>> 2297ea96f39079a2ec0f9449c77ae7247b6021fd
 
 pub struct Vec<T> {
     data: *mut T,
     len: usize,
     capacity: usize,
+    marker: PhantomData<T>,
 }
 
 impl<T> Vec<T> {
@@ -21,10 +26,11 @@ impl<T> Vec<T> {
             data: ptr::null_mut(),
             len: 0,
             capacity: 0,
+            marker: PhantomData,
         }
     }
 
-    pub fn push_back(&mut self, a: T) {
+    pub fn push(&mut self, a: T) {
         if self.capacity < self.len + 1 {
             let new_capacity = if self.capacity == 0 {
                 4
@@ -82,7 +88,7 @@ impl<T> Vec<T> {
         self.capacity = new_capacity;
     }
 
-    pub fn size(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.len
     }
 
@@ -98,7 +104,7 @@ impl<T> Index<usize> for Vec<T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index >= self.size() {
+        if index >= self.len() {
             panic!("index out of bounds")
         } else {
             unsafe {
@@ -110,7 +116,7 @@ impl<T> Index<usize> for Vec<T> {
 
 impl<T> IndexMut<usize> for Vec<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index >= self.size() {
+        if index >= self.len() {
             panic!("index out of bounds")
         } else {
             unsafe {
@@ -133,11 +139,12 @@ where T: Clone {
             data: ptr,
             len: self.len,
             capacity: self.len,
+            marker: PhantomData,
         }
     }
 }
 
-impl<T> Drop for Vec<T> {
+unsafe impl<#[may_dangle] T> Drop for Vec<T> {
     fn drop(&mut self) {
         unsafe {
             ptr::drop_in_place(ptr::slice_from_raw_parts_mut(self.data, self.len));
@@ -256,7 +263,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.cur >= self.v.size() {
+        if self.cur >= self.v.len() {
             None
         } else {
             self.cur += 1;
@@ -272,16 +279,16 @@ mod test {
     #[test]
     fn test() {
         let mut v = Vec::<i32>::new();
-        assert_eq!(v.size(), 0);
-        v.push_back(1);
-        v.push_back(2);
-        assert_eq!(v.size(), 2);
+        assert_eq!(v.len(), 0);
+        v.push(1);
+        v.push(2);
+        assert_eq!(v.len(), 2);
         assert_eq!(v[0], 1);
         assert_eq!(v[1], 2);
-        v.push_back(3);
-        v.push_back(4);
-        v.push_back(5);
-        v.push_back(6);
+        v.push(3);
+        v.push(4);
+        v.push(5);
+        v.push(6);
         assert_eq!(v[0], 1);
         assert_eq!(v[1], 2);
         v[5] = 25;
@@ -298,7 +305,7 @@ mod test {
     #[test]
     fn test3() {
         let mut v = Vec::<i32>::new();
-        v.push_back(1);
+        v.push(1);
         let mut it = v.iter();
         println!("{}", it.next().unwrap());
     }
@@ -307,9 +314,9 @@ mod test {
     fn test4() {
         let mut v = Vec::<i32>::new();
         for i in 0..100 {
-            v.push_back(i);
+            v.push(i);
         }
-        assert_eq!(v.size(), 100);
+        assert_eq!(v.len(), 100);
         let mut j = 0;
         for i in v {
             assert_eq!(i, j);
@@ -320,12 +327,12 @@ mod test {
     #[test]
     fn clone() {
         let mut v1 = Vec::<i32>::new();
-        v1.push_back(2);
-        v1.push_back(3);
+        v1.push(2);
+        v1.push(3);
 
         let v2 = v1.clone();
-        assert_eq!(v1.size(), v2.size());
-        for i in 0..v1.size() {
+        assert_eq!(v1.len(), v2.len());
+        for i in 0..v1.len() {
             assert_eq!(v1[i], v2[i]);
         }
     }
