@@ -7,11 +7,8 @@ use std::mem::ManuallyDrop;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::ptr;
-<<<<<<< HEAD
 use std::fmt;
-=======
 use std::marker::PhantomData;
->>>>>>> 2297ea96f39079a2ec0f9449c77ae7247b6021fd
 
 pub struct Vec<T> {
     data: *mut T,
