@@ -5,11 +5,10 @@ use std::fs;
 use std::string::String;
 use string_error::*;
 
-fn main() -> ExitCode {
+fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: {} filename", &args[0]);
-        return ExitCode::FAILURE;
+        Err(into_err(format!("Usage: {} filename", &args[0])))?;
     }
 
     let filename = &args[1];
@@ -31,5 +30,5 @@ fn main() -> ExitCode {
         }
     }).unwrap();
     println!("{}", position.0 * position.1);
-    return ExitCode::SUCCESS;
+    Ok(())
 }
