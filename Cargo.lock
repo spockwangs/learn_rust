@@ -5,3 +5,12 @@ version = 3
 [[package]]
 name = "learn_rust"
 version = "0.1.0"
+dependencies = [
+ "string-error",
+]
+
+[[package]]
+name = "string-error"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "439558b73299d7afdf52c36399c3c812cca10fe5ca08429f38815df5bacf3ef7"
