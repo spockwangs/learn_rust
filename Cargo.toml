@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 string-error = "0.1.0"
+lazy_static = "1.4.0"
 
 [[bin]]
 name = "day1"
@@ -27,3 +28,7 @@ path = "src/aoc2021/day4.rs"
 [[bin]]
 name = "day5"
 path = "src/aoc2021/day5.rs"
+
+[[bin]]
+name = "day6"
+path = "src/aoc2021/day6.rs"
