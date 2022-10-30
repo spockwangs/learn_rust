@@ -59,29 +59,9 @@ impl HeightMap {
     }
 
     fn get_low_points(&self) -> impl std::iter::Iterator<Item = i32> + '_ {
-        self.data.iter().enumerate().filter(|&(idx, &x)| {
-            if let Some(up) = self.up_height(idx) {
-                if up <= x {
-                    return false;
-                }
-            }
-            if let Some(down) = self.down_height(idx) {
-                if down <= x {
-                    return false;
-                }
-            }
-            if let Some(left) = self.left_height(idx) {
-                if left <= x {
-                    return false;
-                }
-            }
-            if let Some(right) = self.right_height(idx) {
-                if right <= x {
-                    return false;
-                }
-            }
-            return true;
-        }).map(|(_, &x)| x)
+        self.get_low_points_idx().map(|idx| {
+            self.data[idx]
+        })
     }
 
     fn get_low_points_idx(&self) -> impl std::iter::Iterator<Item = usize> + '_ {
