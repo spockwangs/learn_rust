@@ -40,7 +40,7 @@ fn main() {
             score = score*5 + score_matched(a) as i64;
         }
         Some(score)
-    }).filter(|&e| e > 0).collect();
+    }).collect();
     scores.sort();
     println!("{}", scores[scores.len()/2]);
 }
