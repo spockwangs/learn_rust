@@ -27,6 +27,7 @@ use std::task::{
 };
 use std::pin::Pin;
 use std::future::Future;
+use std::error;
 
 mod raw_linked_list;
 use raw_linked_list::List;
@@ -106,11 +107,5 @@ async fn foo(x: &i32) {
 }
 
 fn main() {
-    let mut executor = future_runtime::Executor::new();
-    executor.spawn(async {
-        let x = 1;
-        foo(&x).await;
-        println!("done");
-    });
-    executor.wait();
+    println!("{}", std::mem::size_of::<Box<[i32]>>());
 }
