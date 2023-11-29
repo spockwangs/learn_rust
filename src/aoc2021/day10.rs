@@ -27,7 +27,11 @@ fn main() {
             match c {
                 '(' | '[' | '{' | '<' => stack.push(c),
                 ')' | ']' | '}' | '>' => {
-                    if let Some(a) = stack.pop() && is_matched(a, c) {
+                    if let Some(a) = stack.pop() {
+                        if is_matched(a, c) {
+                        } else {
+                            return None;
+                        }
                     } else {
                         return None;
                     }
@@ -51,7 +55,11 @@ fn calculate_score(s: &str) -> i32 {
         match c {
             '(' | '[' | '{' | '<' => stack.push(c),
             ')' | ']' | '}' | '>' => {
-                if let Some(a) = stack.pop() && is_matched(a, c) {
+                if let Some(a) = stack.pop() {
+                    if is_matched(a, c) {
+                    } else {
+                        return score(c);
+                    }
                 } else {
                     return score(c);
                 }

@@ -9,6 +9,7 @@ use std::ops::IndexMut;
 use std::ptr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::option::Option;
 
 pub struct Vec<T> {
     data: *mut T,
@@ -96,16 +97,16 @@ impl<T> Vec<T> {
         }
     }
 
-    pub fn pop(&mut self) -> T {
+    pub fn pop(&mut self) -> Option<T> {
         if self.len == 0 {
-            panic!("this vec is empty")
+            None
         } else {
             let ret =
                 unsafe {
                     ptr::read(self.data.offset((self.len() - 1) as isize))
                 };
             self.len -= 1;
-            ret
+            Some(ret)
         }
     }
 }
@@ -168,7 +169,7 @@ unsafe impl<#[may_dangle] T> Drop for Vec<T> {
 macro_rules! vec {
     ( $($x:expr),* ) => {
         {
-            let mut tmp_vec = vec::Vec::new();
+            let mut tmp_vec = Vec::new();
             $(
                 tmp_vec.push($x);
             )*
@@ -345,5 +346,15 @@ mod test {
         for i in 0..v1.len() {
             assert_eq!(v1[i], v2[i]);
         }
+    }
+
+    #[test]
+    fn pop() {
+        let mut v = vec![1, 2, 3];
+        assert_eq!(v.pop().unwrap(), 3);
+        assert_eq!(v.pop().unwrap(), 2);
+        assert_eq!(v.pop().unwrap(), 1);
+        assert_eq!(v.len(), 0);
+        assert_eq!(v.pop().is_none(), true);
     }
 }
