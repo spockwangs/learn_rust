@@ -95,6 +95,19 @@ impl<T> Vec<T> {
             cur: 0,
         }
     }
+
+    pub fn pop(&mut self) -> T {
+        if self.len == 0 {
+            panic!("this vec is empty")
+        } else {
+            let ret =
+                unsafe {
+                    ptr::read(self.data.offset((self.len() - 1) as isize))
+                };
+            self.len -= 1;
+            ret
+        }
+    }
 }
 
 impl<T> Index<usize> for Vec<T> {
@@ -157,7 +170,7 @@ macro_rules! vec {
         {
             let mut tmp_vec = vec::Vec::new();
             $(
-                tmp_vec.push_back($x);
+                tmp_vec.push($x);
             )*
                 tmp_vec
         }
@@ -272,7 +285,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[test]
     fn test() {
         let mut v = Vec::<i32>::new();
